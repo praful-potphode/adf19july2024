@@ -1,0 +1,70 @@
+{
+	"name": "df_filter",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_creditcard_csv",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_creditcard_type_json",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "filter1"
+				},
+				{
+					"name": "select1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          credit_card_number as string,",
+				"          expiration_date as string,",
+				"          cvv as string,",
+				"          card_holder_name as string,",
+				"          billing_address as string,",
+				"          billing_city as string,",
+				"          billing_state as string,",
+				"          billing_zip_code as string,",
+				"          card_type as string,",
+				"          credit_limit as string,",
+				"          available_credit as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> source1",
+				"source1 filter(card_type=='Visa') ~> filter1",
+				"filter1 select(mapColumn(",
+				"          credit_card_number,",
+				"          expiration_date,",
+				"          cvv,",
+				"          card_type,",
+				"          credit_limit,",
+				"          available_credit",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"select1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink1"
+			]
+		}
+	}
+}
