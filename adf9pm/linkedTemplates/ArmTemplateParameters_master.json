@@ -5,6 +5,12 @@
 		"factoryName": {
 			"value": "adf9pm"
 		},
+		"ls_AzureDataLakeStorage_accountKey": {
+			"value": ""
+		},
+		"ls_AzureDataLakeStorage_properties_typeProperties_url": {
+			"value": "https://datalakeadfgen2.dfs.core.windows.net/"
+		},
 		"containerUri": {
 			"value": ""
 		},
