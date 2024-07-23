@@ -1,0 +1,23 @@
+{
+	"name": "ds_union_creditcard_json",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_AzureDataLakeStorage",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "ds_union_creditcard.json",
+				"folderPath": {
+					"value": "@formatDateTime(utcNow(),'yyyyMMdd HHmmss')",
+					"type": "Expression"
+				},
+				"fileSystem": "output"
+			}
+		},
+		"schema": {}
+	}
+}

@@ -1,0 +1,82 @@
+{
+	"name": "df_union",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_creditcard2_csv",
+						"type": "DatasetReference"
+					},
+					"name": "creditcard2"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_creditcard_csv",
+						"type": "DatasetReference"
+					},
+					"name": "creditcard3"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_union_creditcard_json",
+						"type": "DatasetReference"
+					},
+					"name": "unionjson"
+				}
+			],
+			"transformations": [
+				{
+					"name": "union1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          credit_card_number as string,",
+				"          expiration_date as string,",
+				"          cvv as string,",
+				"          card_holder_name as string,",
+				"          billing_address as string,",
+				"          billing_city as string,",
+				"          billing_state as string,",
+				"          billing_zip_code as string,",
+				"          card_type as string,",
+				"          credit_limit as string,",
+				"          available_credit as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> creditcard2",
+				"source(output(",
+				"          credit_card_number as string,",
+				"          expiration_date as string,",
+				"          cvv as string,",
+				"          card_holder_name as string,",
+				"          billing_address as string,",
+				"          billing_city as string,",
+				"          billing_state as string,",
+				"          billing_zip_code as string,",
+				"          card_type as string,",
+				"          credit_limit as string,",
+				"          available_credit as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> creditcard3",
+				"creditcard2, creditcard3 union(byName: true)~> union1",
+				"union1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     partitionFileNames:['ds_union_creditcard.json'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> unionjson"
+			]
+		}
+	}
+}
