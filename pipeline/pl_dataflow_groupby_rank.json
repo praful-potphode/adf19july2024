@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "union demo",
+				"name": "groupby and rank demo",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [],
 				"policy": {
