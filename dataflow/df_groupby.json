@@ -1,0 +1,65 @@
+{
+	"name": "df_groupby",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_creditcard2_csv",
+						"type": "DatasetReference"
+					},
+					"name": "creditcard2"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_groupby_rank_csv",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "aggregate1"
+				},
+				{
+					"name": "rank1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          credit_card_number as string,",
+				"          expiration_date as string,",
+				"          cvv as string,",
+				"          card_holder_name as string,",
+				"          billing_address as string,",
+				"          billing_city as string,",
+				"          billing_state as string,",
+				"          billing_zip_code as string,",
+				"          card_type as string,",
+				"          credit_limit as string,",
+				"          available_credit as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> creditcard2",
+				"creditcard2 aggregate(groupBy(card_type),",
+				"     TotalNoofCards = count(credit_card_number)) ~> aggregate1",
+				"aggregate1 rank(desc(TotalNoofCards, true),",
+				"     output(Rank as long)) ~> rank1",
+				"rank1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     partitionFileNames:['ds_groupby_rank.csv'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> sink1"
+			]
+		}
+	}
+}
