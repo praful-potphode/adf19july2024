@@ -1,0 +1,121 @@
+{
+	"name": "dataflow1",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_creditcard_csv",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_visa_AzureSqlTable",
+						"type": "DatasetReference"
+					},
+					"name": "visa"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_mastercard_AzureSqlTable",
+						"type": "DatasetReference"
+					},
+					"name": "mastercard"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_america_express_AzureSqlTable",
+						"type": "DatasetReference"
+					},
+					"name": "americanexpress"
+				}
+			],
+			"transformations": [
+				{
+					"name": "selectcolumns"
+				},
+				{
+					"name": "cast1"
+				},
+				{
+					"name": "split1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          credit_card_number as string,",
+				"          expiration_date as string,",
+				"          cvv as string,",
+				"          card_holder_name as string,",
+				"          billing_address as string,",
+				"          billing_city as string,",
+				"          billing_state as string,",
+				"          billing_zip_code as string,",
+				"          card_type as string,",
+				"          credit_limit as string,",
+				"          available_credit as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> source1",
+				"source1 select(mapColumn(",
+				"          credit_card_number,",
+				"          expiration_date,",
+				"          cvv,",
+				"          card_holder_name,",
+				"          card_type,",
+				"          credit_limit,",
+				"          available_credit",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> selectcolumns",
+				"selectcolumns cast(output(",
+				"          credit_card_number as long '000,000,000',",
+				"          expiration_date as date 'MM/dd/yyyy',",
+				"          cvv as integer,",
+				"          credit_limit as double,",
+				"          available_credit as double",
+				"     ),",
+				"     errors: true) ~> cast1",
+				"cast1 split(card_type=='Visa',",
+				"     card_type=='Mastercard',",
+				"     disjoint: false) ~> split1@(visa, mastercard, americanexpress)",
+				"split1@visa sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> visa",
+				"split1@mastercard sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> mastercard",
+				"split1@americanexpress sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> americanexpress"
+			]
+		}
+	}
+}

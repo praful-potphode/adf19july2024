@@ -1,0 +1,16 @@
+{
+	"name": "ds_america_express_AzureSqlTable",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_AzureSqlDatabase",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "americanexpress"
+		}
+	}
+}
