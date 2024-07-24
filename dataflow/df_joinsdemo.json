@@ -1,0 +1,88 @@
+{
+	"name": "df_joinsdemo",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_empdata_csv",
+						"type": "DatasetReference"
+					},
+					"name": "employeedata"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_designation_csv",
+						"type": "DatasetReference"
+					},
+					"name": "designationdata"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_employees_azureSqlTable",
+						"type": "DatasetReference"
+					},
+					"name": "LoadInEMpTable"
+				}
+			],
+			"transformations": [
+				{
+					"name": "joinEmployeeAndDesignation"
+				},
+				{
+					"name": "selectColumns"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          emp_id as integer,",
+				"          name as string,",
+				"          age as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> employeedata",
+				"source(output(",
+				"          emp_id as integer,",
+				"          designation as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> designationdata",
+				"employeedata, designationdata join(employeedata@emp_id == designationdata@emp_id,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> joinEmployeeAndDesignation",
+				"joinEmployeeAndDesignation select(mapColumn(",
+				"          emp_id = employeedata@emp_id,",
+				"          name,",
+				"          age,",
+				"          designation",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> selectColumns",
+				"selectColumns sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          skey as integer,",
+				"          emp_id as integer,",
+				"          name as string,",
+				"          age as integer,",
+				"          designation as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> LoadInEMpTable"
+			]
+		}
+	}
+}
