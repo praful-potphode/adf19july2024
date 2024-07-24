@@ -1,0 +1,34 @@
+{
+	"name": "ds_pivot_xlsx",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_AzureDataLakeStorage",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Excel",
+		"typeProperties": {
+			"sheetName": "PIVOT",
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "Pivot.xlsx",
+				"fileSystem": "input"
+			},
+			"firstRowAsHeader": true
+		},
+		"schema": [
+			{
+				"name": "Month",
+				"type": "String"
+			},
+			{
+				"name": "Sales",
+				"type": "String"
+			},
+			{
+				"name": "Year",
+				"type": "String"
+			}
+		]
+	}
+}
