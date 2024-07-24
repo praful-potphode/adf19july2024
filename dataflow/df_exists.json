@@ -1,0 +1,71 @@
+{
+	"name": "df_exists",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_intersect_table1_csv",
+						"type": "DatasetReference"
+					},
+					"name": "intersecttable1"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_intersect_table2_csv",
+						"type": "DatasetReference"
+					},
+					"name": "intersecttable2"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_exists_csv",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "exists1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          country as string,",
+				"          state as string,",
+				"          count as string,",
+				"          total as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> intersecttable1",
+				"source(output(",
+				"          country as string,",
+				"          state as string,",
+				"          count as string,",
+				"          total as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> intersecttable2",
+				"intersecttable1, intersecttable2 exists(intersecttable1@country == intersecttable2@country",
+				"     && intersecttable1@state == intersecttable2@state",
+				"     && intersecttable1@count == intersecttable2@count",
+				"     && intersecttable1@total == intersecttable2@total,",
+				"     negate:true,",
+				"     broadcast: 'auto')~> exists1",
+				"exists1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink1"
+			]
+		}
+	}
+}
