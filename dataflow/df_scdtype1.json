@@ -35,17 +35,7 @@
 					"name": "sink1"
 				}
 			],
-			"transformations": [
-				{
-					"name": "insertrows"
-				},
-				{
-					"name": "updaterows"
-				},
-				{
-					"name": "alterRow1"
-				}
-			],
+			"transformations": [],
 			"scriptLines": [
 				"source(output(",
 				"          empid as integer,",
@@ -59,16 +49,7 @@
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     format: 'table') ~> dimemployeesrc",
-				"employeecsv, dimemployeesrc exists(empid==empid\r",
-				"&& name==name\r",
-				"&& designation==designation,",
-				"     negate:true,",
-				"     broadcast: 'auto')~> insertrows",
-				"dimemployeesrc, employeecsv exists(ERROR_FUNCTION('') == ERROR_FUNCTION(''),",
-				"     negate:false,",
-				"     broadcast: 'auto')~> updaterows",
-				"updaterows alterRow() ~> alterRow1",
-				"insertrows sink(allowSchemaDrift: true,",
+				"employeecsv sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     deletable:false,",
 				"     insertable:true,",
@@ -78,11 +59,11 @@
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
 				"     errorHandlingOption: 'stopOnFirstError') ~> dimemployee",
-				"alterRow1 sink(allowSchemaDrift: true,",
+				"dimemployeesrc sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     deletable:false,",
-				"     insertable:false,",
-				"     updateable:true,",
+				"     insertable:true,",
+				"     updateable:false,",
 				"     upsertable:false,",
 				"     format: 'table',",
 				"     skipDuplicateMapInputs: true,",
