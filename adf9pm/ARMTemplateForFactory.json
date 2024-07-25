@@ -1652,10 +1652,24 @@
 								"referenceName": "ds_empdata_csv_scd",
 								"type": "DatasetReference"
 							},
-							"name": "source1"
+							"name": "employeecsv"
+						},
+						{
+							"dataset": {
+								"referenceName": "AzureSqlTable1",
+								"type": "DatasetReference"
+							},
+							"name": "dimemployeesrc"
 						}
 					],
 					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "AzureSqlTable1",
+								"type": "DatasetReference"
+							},
+							"name": "dimemployee"
+						},
 						{
 							"dataset": {
 								"referenceName": "AzureSqlTable1",
@@ -1673,8 +1687,22 @@
 						"     ),",
 						"     allowSchemaDrift: true,",
 						"     validateSchema: false,",
-						"     ignoreNoFilesFound: false) ~> source1",
-						"source1 sink(allowSchemaDrift: true,",
+						"     ignoreNoFilesFound: false) ~> employeecsv",
+						"source(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> dimemployeesrc",
+						"employeecsv sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError') ~> dimemployee",
+						"dimemployeesrc sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
 						"     deletable:false,",
 						"     insertable:true,",
@@ -1779,7 +1807,9 @@
 								"type": "DataFlowReference",
 								"parameters": {},
 								"datasetParameters": {
-									"source1": {},
+									"employeecsv": {},
+									"dimemployeesrc": {},
+									"dimemployee": {},
 									"sink1": {}
 								}
 							},
