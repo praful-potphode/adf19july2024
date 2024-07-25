@@ -9,7 +9,14 @@
 						"referenceName": "ds_empdata_csv_scd",
 						"type": "DatasetReference"
 					},
-					"name": "source1"
+					"name": "employeecsv"
+				},
+				{
+					"dataset": {
+						"referenceName": "AzureSqlTable1",
+						"type": "DatasetReference"
+					},
+					"name": "dimemployeesrc"
 				}
 			],
 			"sinks": [
@@ -18,10 +25,27 @@
 						"referenceName": "AzureSqlTable1",
 						"type": "DatasetReference"
 					},
+					"name": "dimemployee"
+				},
+				{
+					"dataset": {
+						"referenceName": "AzureSqlTable1",
+						"type": "DatasetReference"
+					},
 					"name": "sink1"
 				}
 			],
-			"transformations": [],
+			"transformations": [
+				{
+					"name": "insertrows"
+				},
+				{
+					"name": "updaterows"
+				},
+				{
+					"name": "alterRow1"
+				}
+			],
 			"scriptLines": [
 				"source(output(",
 				"          empid as integer,",
@@ -30,12 +54,35 @@
 				"     ),",
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
-				"     ignoreNoFilesFound: false) ~> source1",
-				"source1 sink(allowSchemaDrift: true,",
+				"     ignoreNoFilesFound: false) ~> employeecsv",
+				"source(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> dimemployeesrc",
+				"employeecsv, dimemployeesrc exists(empid==empid\r",
+				"&& name==name\r",
+				"&& designation==designation,",
+				"     negate:true,",
+				"     broadcast: 'auto')~> insertrows",
+				"dimemployeesrc, employeecsv exists(ERROR_FUNCTION('') == ERROR_FUNCTION(''),",
+				"     negate:false,",
+				"     broadcast: 'auto')~> updaterows",
+				"updaterows alterRow() ~> alterRow1",
+				"insertrows sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     deletable:false,",
 				"     insertable:true,",
 				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> dimemployee",
+				"alterRow1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     deletable:false,",
+				"     insertable:false,",
+				"     updateable:true,",
 				"     upsertable:false,",
 				"     format: 'table',",
 				"     skipDuplicateMapInputs: true,",
