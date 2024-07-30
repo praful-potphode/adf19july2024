@@ -32,7 +32,7 @@
 						"referenceName": "ds_dimeployee_AzureSqlTable",
 						"type": "DatasetReference"
 					},
-					"name": "sink1"
+					"name": "UpdateRecordsInDB"
 				}
 			],
 			"transformations": [
@@ -131,7 +131,7 @@
 				"          empid,",
 				"          name,",
 				"          designation",
-				"     )) ~> sink1"
+				"     )) ~> UpdateRecordsInDB"
 			]
 		}
 	}
