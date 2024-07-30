@@ -13,29 +13,45 @@
 				},
 				{
 					"dataset": {
-						"referenceName": "AzureSqlTable1",
+						"referenceName": "ds_dimeployee_AzureSqlTable",
 						"type": "DatasetReference"
 					},
-					"name": "dimemployeesrc"
+					"name": "dimemployee"
 				}
 			],
 			"sinks": [
 				{
 					"dataset": {
-						"referenceName": "AzureSqlTable1",
+						"referenceName": "ds_dimeployee_AzureSqlTable",
 						"type": "DatasetReference"
 					},
-					"name": "dimemployee"
+					"name": "InsertRecords"
 				},
 				{
 					"dataset": {
-						"referenceName": "AzureSqlTable1",
+						"referenceName": "ds_dimeployee_AzureSqlTable",
 						"type": "DatasetReference"
 					},
 					"name": "sink1"
 				}
 			],
-			"transformations": [],
+			"transformations": [
+				{
+					"name": "newrecords"
+				},
+				{
+					"name": "UpdateRecords"
+				},
+				{
+					"name": "lookup1"
+				},
+				{
+					"name": "select1"
+				},
+				{
+					"name": "alterRow1"
+				}
+			],
 			"scriptLines": [
 				"source(output(",
 				"          empid as integer,",
@@ -45,12 +61,47 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false) ~> employeecsv",
-				"source(allowSchemaDrift: true,",
+				"source(output(",
+				"          skey as integer,",
+				"          empid as integer,",
+				"          name as string,",
+				"          designation as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
-				"     format: 'table') ~> dimemployeesrc",
-				"employeecsv sink(allowSchemaDrift: true,",
+				"     format: 'table') ~> dimemployee",
+				"employeecsv, dimemployee exists(employeecsv@empid == dimemployee@empid",
+				"     && employeecsv@name == dimemployee@name,",
+				"     negate:true,",
+				"     broadcast: 'auto')~> newrecords",
+				"dimemployee, employeecsv exists(employeecsv@empid==dimemployee@empid &&\r",
+				"employeecsv@name==dimemployee@name &&\r",
+				"dimemployee@designation!=employeecsv@designation \r",
+				",",
+				"     negate:false,",
+				"     broadcast: 'both')~> UpdateRecords",
+				"UpdateRecords, employeecsv lookup(dimemployee@empid == employeecsv@empid",
+				"     && dimemployee@name == employeecsv@name,",
+				"     multiple: false,",
+				"     pickup: 'any',",
+				"     broadcast: 'auto')~> lookup1",
+				"lookup1 select(mapColumn(",
+				"          empid = employeecsv@empid,",
+				"          name = employeecsv@name,",
+				"          designation = employeecsv@designation",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"select1 alterRow(updateIf(true())) ~> alterRow1",
+				"newrecords sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
+				"     input(",
+				"          skey as integer,",
+				"          empid as integer,",
+				"          name as string,",
+				"          designation as string",
+				"     ),",
 				"     deletable:false,",
 				"     insertable:true,",
 				"     updateable:false,",
@@ -58,17 +109,29 @@
 				"     format: 'table',",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
-				"     errorHandlingOption: 'stopOnFirstError') ~> dimemployee",
-				"dimemployeesrc sink(allowSchemaDrift: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> InsertRecords",
+				"alterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
+				"     input(",
+				"          skey as integer,",
+				"          empid as integer,",
+				"          name as string,",
+				"          designation as string",
+				"     ),",
 				"     deletable:false,",
-				"     insertable:true,",
-				"     updateable:false,",
-				"     upsertable:false,",
+				"     insertable:false,",
+				"     updateable:true,",
+				"     upsertable:true,",
+				"     keys:['empid','name'],",
 				"     format: 'table',",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
-				"     errorHandlingOption: 'stopOnFirstError') ~> sink1"
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          empid,",
+				"          name,",
+				"          designation",
+				"     )) ~> sink1"
 			]
 		}
 	}
