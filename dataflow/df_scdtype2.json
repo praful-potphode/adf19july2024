@@ -1,0 +1,63 @@
+{
+	"name": "df_scdtype2",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_empdata_csv_scd",
+						"type": "DatasetReference"
+					},
+					"name": "employeecsv"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_scd2_AzureSqlTable",
+						"type": "DatasetReference"
+					},
+					"name": "InsertNewrecords"
+				}
+			],
+			"transformations": [
+				{
+					"name": "CreateAuditCOlumns"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          empid as integer,",
+				"          name as string,",
+				"          designation as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> employeecsv",
+				"employeecsv derive(startdate = currentDate(),",
+				"          enddate = '',",
+				"          iscurrent = 1) ~> CreateAuditCOlumns",
+				"CreateAuditCOlumns sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          skey as integer,",
+				"          empid as integer,",
+				"          name as string,",
+				"          designation as string,",
+				"          startdate as date,",
+				"          enddate as date,",
+				"          iscurrent as integer",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> InsertNewrecords"
+			]
+		}
+	}
+}
