@@ -11,7 +11,7 @@
 			"location": {
 				"type": "AzureBlobFSLocation",
 				"fileName": "SCD1.csv",
-				"folderPath": "scd-1",
+				"folderPath": "SCD-1",
 				"fileSystem": "input"
 			},
 			"columnDelimiter": ",",
