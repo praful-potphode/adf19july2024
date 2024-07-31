@@ -17,7 +17,7 @@
 		},
 		"ls_AzureDataLakeStorage_properties_typeProperties_url": {
 			"type": "string",
-			"defaultValue": "https://datalakegen29pm.dfs.core.windows.net/"
+			"defaultValue": "https://datalakeadfgen2.dfs.core.windows.net/"
 		}
 	},
 	"variables": {
@@ -409,8 +409,8 @@
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
-						"fileName": "SCD11.csv",
-						"folderPath": "scd-1",
+						"fileName": "SCD1.csv",
+						"folderPath": "SCD-1",
 						"fileSystem": "input"
 					},
 					"columnDelimiter": ",",
