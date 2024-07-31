@@ -10,7 +10,7 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"fileName": "SCD11.csv",
+				"fileName": "SCD1.csv",
 				"folderPath": "scd-1",
 				"fileSystem": "input"
 			},
