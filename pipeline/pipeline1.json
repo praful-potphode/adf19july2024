@@ -56,7 +56,7 @@
 				]
 			},
 			{
-				"name": "Stored procedure1",
+				"name": "Load DIm Department",
 				"type": "SqlServerStoredProcedure",
 				"dependsOn": [
 					{
