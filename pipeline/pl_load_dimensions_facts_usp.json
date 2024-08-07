@@ -1,6 +1,7 @@
 {
-	"name": "pipeline1",
+	"name": "pl_load_dimensions_facts_usp",
 	"properties": {
+		"description": "this pipeline loads the data in dimensions and facts using stored procedures",
 		"activities": [
 			{
 				"name": "Copy data from csv to staging table",
@@ -28,6 +29,7 @@
 					},
 					"sink": {
 						"type": "AzureSqlSink",
+						"preCopyScript": "truncate table staging.sales;",
 						"writeBehavior": "insert",
 						"sqlWriterUseTableLock": false,
 						"disableMetricsCollection": false
@@ -45,7 +47,10 @@
 				"inputs": [
 					{
 						"referenceName": "ds_factsales_csv",
-						"type": "DatasetReference"
+						"type": "DatasetReference",
+						"parameters": {
+							"filename": "FactSales2.csv"
+						}
 					}
 				],
 				"outputs": [
@@ -76,6 +81,60 @@
 				"userProperties": [],
 				"typeProperties": {
 					"storedProcedureName": "[dbo].[usp_load_department_table]"
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_AzureSqlDatabase",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "Load DimEmployee SCD2",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "Load DIm Department",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[dbo].[load_dimemployee_scd2]"
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_AzureSqlDatabase",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "Load FactSales",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "Load DimEmployee SCD2",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[dbo].[load_factsales]"
 				},
 				"linkedServiceName": {
 					"referenceName": "ls_AzureSqlDatabase",
