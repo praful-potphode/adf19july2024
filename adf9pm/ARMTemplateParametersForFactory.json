@@ -12,7 +12,7 @@
 			"value": ""
 		},
 		"ls_AzureDataLakeStorage_properties_typeProperties_url": {
-			"value": "https://datalakeadfgen2.dfs.core.windows.net/"
+			"value": "https://datalakegen2stage.dfs.core.windows.net/"
 		}
 	}
 }

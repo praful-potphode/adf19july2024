@@ -17,7 +17,7 @@
 		},
 		"ls_AzureDataLakeStorage_properties_typeProperties_url": {
 			"type": "string",
-			"defaultValue": "https://datalakeadfgen2.dfs.core.windows.net/"
+			"defaultValue": "https://datalakegen2stage.dfs.core.windows.net/"
 		},
 		"containerUri": {
 			"type": "string",
@@ -77,6 +77,26 @@
 			},
 			"dependsOn": [
 				"[resourceId('Microsoft.Resources/deployments', 'adf9pm_ArmTemplate_0')]"
+			]
+		},
+		{
+			"name": "adf9pm_ArmTemplate_2",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_2.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'adf9pm_ArmTemplate_1')]"
 			]
 		}
 	]
