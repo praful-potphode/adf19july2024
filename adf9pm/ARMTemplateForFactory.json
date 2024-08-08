@@ -18,6 +18,10 @@
 		"ls_AzureDataLakeStorage_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://datalakegen2stage.dfs.core.windows.net/"
+		},
+		"trigger1_properties_typeProperties_scope": {
+			"type": "string",
+			"defaultValue": "/subscriptions/e526ad88-d1ae-4400-b898-7d39b489e571/resourceGroups/rg-adf9pm/providers/Microsoft.Storage/storageAccounts/datalakegen2stage"
 		}
 	},
 	"variables": {
@@ -274,7 +278,14 @@
 					{
 						"name": "Copy data from csv to staging table",
 						"type": "Copy",
-						"dependsOn": [],
+						"dependsOn": [
+							{
+								"activity": "Get File name from Factsales folder",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
 						"policy": {
 							"timeout": "0.12:00:00",
 							"retry": 0,
@@ -317,13 +328,16 @@
 								"referenceName": "ds_factsales_csv",
 								"type": "DatasetReference",
 								"parameters": {
-									"filename": "FactSales2.csv"
+									"filename": {
+										"value": "@activity('Get File name from Factsales folder').output.childItems[0].name",
+										"type": "Expression"
+									}
 								}
 							}
 						],
 						"outputs": [
 							{
-								"referenceName": "ds_staging_sales_AzureSqlTable2",
+								"referenceName": "ds_staging_sales_AzureSqlTable",
 								"type": "DatasetReference",
 								"parameters": {}
 							}
@@ -409,6 +423,74 @@
 							"referenceName": "ls_AzureSqlDatabase",
 							"type": "LinkedServiceReference"
 						}
+					},
+					{
+						"name": "Get File name from Factsales folder",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "ds_FactSales_Folder",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"fieldList": [
+								"childItems"
+							],
+							"storeSettings": {
+								"type": "AzureBlobFSReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
+							}
+						}
+					},
+					{
+						"name": "Delete1",
+						"type": "Delete",
+						"dependsOn": [
+							{
+								"activity": "Load FactSales",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "ds_FactSales_Folder",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"enableLogging": false,
+							"storeSettings": {
+								"type": "AzureBlobFSReadSettings",
+								"recursive": true,
+								"wildcardFileName": {
+									"value": "@activity('Get File name from Factsales folder').output.childItems[0].name",
+									"type": "Expression"
+								},
+								"enablePartitionDiscovery": false
+							}
+						}
 					}
 				],
 				"policy": {
@@ -418,8 +500,9 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/ds_factsales_csv')]",
-				"[concat(variables('factoryId'), '/datasets/ds_staging_sales_AzureSqlTable2')]",
-				"[concat(variables('factoryId'), '/linkedServices/ls_AzureSqlDatabase')]"
+				"[concat(variables('factoryId'), '/datasets/ds_staging_sales_AzureSqlTable')]",
+				"[concat(variables('factoryId'), '/linkedServices/ls_AzureSqlDatabase')]",
+				"[concat(variables('factoryId'), '/datasets/ds_FactSales_Folder')]"
 			]
 		},
 		{
@@ -748,6 +831,51 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/ls_AzureSqlDatabase')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_FactSales_Folder')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_AzureDataLakeStorage",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "FactSales",
+						"fileSystem": "input"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "orderid",
+						"type": "String"
+					},
+					{
+						"name": "employee_name",
+						"type": "String"
+					},
+					{
+						"name": "department_name",
+						"type": "String"
+					},
+					{
+						"name": "sales",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_AzureDataLakeStorage')]"
 			]
 		},
 		{
@@ -1249,7 +1377,10 @@
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
-						"fileName": "FactSales.csv",
+						"fileName": {
+							"value": "@dataset().filename",
+							"type": "Expression"
+						},
 						"folderPath": "FactSales",
 						"fileSystem": "input"
 					},
@@ -1544,7 +1675,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/ds_staging_sales_AzureSqlTable2')]",
+			"name": "[concat(parameters('factoryName'), '/ds_staging_sales_AzureSqlTable')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -1642,6 +1773,37 @@
 				}
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/trigger1')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "pl_load_dimensions_facts_usp",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "BlobEventsTrigger",
+				"typeProperties": {
+					"blobPathBeginsWith": "/input/blobs/FactSales/",
+					"blobPathEndsWith": ".csv",
+					"ignoreEmptyBlobs": true,
+					"scope": "[parameters('trigger1_properties_typeProperties_scope')]",
+					"events": [
+						"Microsoft.Storage.BlobCreated"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/pl_load_dimensions_facts_usp')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/df_conditional_split')]",
