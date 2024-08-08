@@ -65,7 +65,7 @@
 				],
 				"outputs": [
 					{
-						"referenceName": "ds_staging_sales_AzureSqlTable2",
+						"referenceName": "ds_staging_sales_AzureSqlTable",
 						"type": "DatasetReference"
 					}
 				]
