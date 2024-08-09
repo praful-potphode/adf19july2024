@@ -12,7 +12,7 @@
 			"value": ""
 		},
 		"ls_AzureDataLakeStorage_properties_typeProperties_url": {
-			"value": "https://datalakegen2stage.dfs.core.windows.net/"
+			"value": "https://datalakeadfgen2.dfs.core.windows.net/"
 		},
 		"trigger1_properties_typeProperties_scope": {
 			"value": "/subscriptions/e526ad88-d1ae-4400-b898-7d39b489e571/resourceGroups/rg-adf9pm/providers/Microsoft.Storage/storageAccounts/datalakegen2stage"
