@@ -1,0 +1,19 @@
+{
+	"name": "sd_transaction_json",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_AzureDataLakeStorage",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "delta.json",
+				"fileSystem": "delta"
+			}
+		},
+		"schema": {}
+	}
+}
