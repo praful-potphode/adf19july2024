@@ -19,6 +19,22 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'ls_SqlServer_localhost'"
 		},
+		"ls_onprem_SqlServer_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'ls_onprem_SqlServer'"
+		},
+		"ls_AzureDataLakeStorage1_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'ls_AzureDataLakeStorage1'"
+		},
+		"SqlServer1_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'SqlServer1'"
+		},
+		"ls_Oracle_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'ls_Oracle'"
+		},
 		"ls_AzureDataLakeStorage_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://datalakeadfgen2.dfs.core.windows.net/"
@@ -26,6 +42,10 @@
 		"trigger1_properties_typeProperties_scope": {
 			"type": "string",
 			"defaultValue": "/subscriptions/e526ad88-d1ae-4400-b898-7d39b489e571/resourceGroups/rg-adf9pm/providers/Microsoft.Storage/storageAccounts/datalakegen2stage"
+		},
+		"ls_AzureDataLakeStorage1_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://datalakeadfgen2.dfs.core.windows.net/"
 		},
 		"containerUri": {
 			"type": "string",
@@ -60,8 +80,14 @@
 					"ls_AzureSqlDatabase_connectionString": {
 						"value": "[parameters('ls_AzureSqlDatabase_connectionString')]"
 					},
+					"ls_AzureDataLakeStorage1_accountKey": {
+						"value": "[parameters('ls_AzureDataLakeStorage1_accountKey')]"
+					},
 					"ls_AzureDataLakeStorage_properties_typeProperties_url": {
 						"value": "[parameters('ls_AzureDataLakeStorage_properties_typeProperties_url')]"
+					},
+					"ls_AzureDataLakeStorage1_properties_typeProperties_url": {
+						"value": "[parameters('ls_AzureDataLakeStorage1_properties_typeProperties_url')]"
 					}
 				}
 			},
@@ -83,6 +109,9 @@
 					},
 					"ls_SqlServer_localhost_connectionString": {
 						"value": "[parameters('ls_SqlServer_localhost_connectionString')]"
+					},
+					"ls_onprem_SqlServer_connectionString": {
+						"value": "[parameters('ls_onprem_SqlServer_connectionString')]"
 					}
 				}
 			},
@@ -104,13 +133,39 @@
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
 					},
+					"SqlServer1_connectionString": {
+						"value": "[parameters('SqlServer1_connectionString')]"
+					},
+					"ls_Oracle_connectionString": {
+						"value": "[parameters('ls_Oracle_connectionString')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'adf9pm_ArmTemplate_1')]"
+			]
+		},
+		{
+			"name": "adf9pm_ArmTemplate_3",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_3.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
 					"trigger1_properties_typeProperties_scope": {
 						"value": "[parameters('trigger1_properties_typeProperties_scope')]"
 					}
 				}
 			},
 			"dependsOn": [
-				"[resourceId('Microsoft.Resources/deployments', 'adf9pm_ArmTemplate_1')]"
+				"[resourceId('Microsoft.Resources/deployments', 'adf9pm_ArmTemplate_2')]"
 			]
 		}
 	]

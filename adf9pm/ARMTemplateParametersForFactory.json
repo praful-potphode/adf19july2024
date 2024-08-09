@@ -14,11 +14,26 @@
 		"ls_SqlServer_localhost_connectionString": {
 			"value": ""
 		},
+		"ls_onprem_SqlServer_connectionString": {
+			"value": ""
+		},
+		"ls_AzureDataLakeStorage1_accountKey": {
+			"value": ""
+		},
+		"SqlServer1_connectionString": {
+			"value": ""
+		},
+		"ls_Oracle_connectionString": {
+			"value": ""
+		},
 		"ls_AzureDataLakeStorage_properties_typeProperties_url": {
 			"value": "https://datalakeadfgen2.dfs.core.windows.net/"
 		},
 		"trigger1_properties_typeProperties_scope": {
 			"value": "/subscriptions/e526ad88-d1ae-4400-b898-7d39b489e571/resourceGroups/rg-adf9pm/providers/Microsoft.Storage/storageAccounts/datalakegen2stage"
+		},
+		"ls_AzureDataLakeStorage1_properties_typeProperties_url": {
+			"value": "https://datalakeadfgen2.dfs.core.windows.net/"
 		}
 	}
 }
