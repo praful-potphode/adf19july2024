@@ -17,6 +17,304 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/df_scdtype2')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "ds_empdata_csv_scd",
+								"type": "DatasetReference"
+							},
+							"name": "employeecsv"
+						},
+						{
+							"dataset": {
+								"referenceName": "ds_scd2_AzureSqlTable",
+								"type": "DatasetReference"
+							},
+							"name": "azsqldimemployeescd2"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "ds_scd2_AzureSqlTable",
+								"type": "DatasetReference"
+							},
+							"name": "InsertNewrecords"
+						},
+						{
+							"dataset": {
+								"referenceName": "ds_scd2_AzureSqlTable",
+								"type": "DatasetReference"
+							},
+							"name": "insertoldrecordsnewvalues"
+						},
+						{
+							"dataset": {
+								"referenceName": "ds_scd2_AzureSqlTable",
+								"type": "DatasetReference"
+							},
+							"name": "updateoldrecords"
+						}
+					],
+					"transformations": [
+						{
+							"name": "CreateAuditCOlumns"
+						},
+						{
+							"name": "exists1"
+						},
+						{
+							"name": "join1"
+						},
+						{
+							"name": "selectcsvcolumns"
+						},
+						{
+							"name": "updateauditcolumnsforactive"
+						},
+						{
+							"name": "selectazsqlcolumns"
+						},
+						{
+							"name": "updateauditcolumnsforinactive"
+						},
+						{
+							"name": "alterRow1"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          empid as integer,",
+						"          name as string,",
+						"          designation as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> employeecsv",
+						"source(output(",
+						"          skey as integer,",
+						"          empid as integer,",
+						"          name as string,",
+						"          designation as string,",
+						"          startdate as date,",
+						"          enddate as date,",
+						"          iscurrent as integer",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> azsqldimemployeescd2",
+						"exists1 derive(startdate = currentDate(),",
+						"          enddate = '',",
+						"          iscurrent = 1) ~> CreateAuditCOlumns",
+						"employeecsv, azsqldimemployeescd2 exists(employeecsv@empid == azsqldimemployeescd2@empid",
+						"     && employeecsv@name == azsqldimemployeescd2@name,",
+						"     negate:true,",
+						"     broadcast: 'auto')~> exists1",
+						"azsqldimemployeescd2, employeecsv join(azsqldimemployeescd2@empid == employeecsv@empid",
+						"     && azsqldimemployeescd2@name == employeecsv@name,",
+						"     joinType:'inner',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> join1",
+						"join1 select(mapColumn(",
+						"          startdate,",
+						"          enddate,",
+						"          iscurrent,",
+						"          empid = employeecsv@empid,",
+						"          name = employeecsv@name,",
+						"          designation = employeecsv@designation",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> selectcsvcolumns",
+						"selectcsvcolumns derive(startdate = addDays(currentDate(), 1)) ~> updateauditcolumnsforactive",
+						"join1 select(mapColumn(",
+						"          empid = azsqldimemployeescd2@empid,",
+						"          name = azsqldimemployeescd2@name,",
+						"          designation = azsqldimemployeescd2@designation,",
+						"          startdate,",
+						"          enddate,",
+						"          iscurrent,",
+						"          skey",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> selectazsqlcolumns",
+						"selectazsqlcolumns derive(enddate = currentDate(),",
+						"          iscurrent = 0) ~> updateauditcolumnsforinactive",
+						"updateauditcolumnsforinactive alterRow(updateIf(true())) ~> alterRow1",
+						"CreateAuditCOlumns sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          skey as integer,",
+						"          empid as integer,",
+						"          name as string,",
+						"          designation as string,",
+						"          startdate as date,",
+						"          enddate as date,",
+						"          iscurrent as integer",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError') ~> InsertNewrecords",
+						"updateauditcolumnsforactive sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          skey as integer,",
+						"          empid as integer,",
+						"          name as string,",
+						"          designation as string,",
+						"          startdate as date,",
+						"          enddate as date,",
+						"          iscurrent as integer",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError',",
+						"     mapColumn(",
+						"          empid,",
+						"          name,",
+						"          designation,",
+						"          startdate,",
+						"          enddate,",
+						"          iscurrent",
+						"     )) ~> insertoldrecordsnewvalues",
+						"alterRow1 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          skey as integer,",
+						"          empid as integer,",
+						"          name as string,",
+						"          designation as string,",
+						"          startdate as date,",
+						"          enddate as date,",
+						"          iscurrent as integer",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:false,",
+						"     updateable:true,",
+						"     upsertable:false,",
+						"     keys:['empid','skey','name','designation'],",
+						"     skipKeyWrites:true,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError',",
+						"     mapColumn(",
+						"          skey,",
+						"          empid,",
+						"          name,",
+						"          designation,",
+						"          startdate,",
+						"          enddate,",
+						"          iscurrent",
+						"     )) ~> updateoldrecords"
+					]
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/df_union')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "ds_creditcard2_csv",
+								"type": "DatasetReference"
+							},
+							"name": "creditcard2"
+						},
+						{
+							"dataset": {
+								"referenceName": "ds_creditcard_csv",
+								"type": "DatasetReference"
+							},
+							"name": "creditcard3"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "ds_union_creditcard_json",
+								"type": "DatasetReference"
+							},
+							"name": "unionjson"
+						}
+					],
+					"transformations": [
+						{
+							"name": "union1"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          credit_card_number as string,",
+						"          expiration_date as string,",
+						"          cvv as string,",
+						"          card_holder_name as string,",
+						"          billing_address as string,",
+						"          billing_city as string,",
+						"          billing_state as string,",
+						"          billing_zip_code as string,",
+						"          card_type as string,",
+						"          credit_limit as string,",
+						"          available_credit as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> creditcard2",
+						"source(output(",
+						"          credit_card_number as string,",
+						"          expiration_date as string,",
+						"          cvv as string,",
+						"          card_holder_name as string,",
+						"          billing_address as string,",
+						"          billing_city as string,",
+						"          billing_state as string,",
+						"          billing_zip_code as string,",
+						"          card_type as string,",
+						"          credit_limit as string,",
+						"          available_credit as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> creditcard3",
+						"creditcard2, creditcard3 union(byName: true)~> union1",
+						"union1 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     partitionFileNames:['ds_union_creditcard.json'],",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> unionjson"
+					]
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/pl_dataflow')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -244,7 +542,9 @@
 				},
 				"annotations": []
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/df_union')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/pl_loadfactsales')]",
@@ -458,7 +758,9 @@
 				},
 				"annotations": []
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/df_scdtype2')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/trigger1')]",

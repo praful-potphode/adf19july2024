@@ -11,6 +11,9 @@
 		"ls_AzureSqlDatabase_connectionString": {
 			"value": ""
 		},
+		"ls_SqlServer_localhost_connectionString": {
+			"value": ""
+		},
 		"ls_AzureDataLakeStorage_properties_typeProperties_url": {
 			"value": "https://datalakeadfgen2.dfs.core.windows.net/"
 		},
