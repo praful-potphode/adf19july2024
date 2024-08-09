@@ -1,5 +1,11 @@
 {
 	"name": "adf9pm",
+	"properties": {
+		"globalConfigurations": {
+			"factoryStagingLSReferenceName": "ls_AzureDataLakeStorage",
+			"factoryStagingLSType": "LinkedServiceReference"
+		}
+	},
 	"location": "centralindia",
 	"identity": {
 		"type": "SystemAssigned",
