@@ -1,0 +1,134 @@
+{
+	"name": "ds_salesorderheader_Parquet1",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_AzureDataLakeStorage1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "Salesorderheader.parquet",
+				"folderPath": "Parquet",
+				"fileSystem": "output"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": [
+			{
+				"name": "SalesOrderID",
+				"type": "INT32"
+			},
+			{
+				"name": "RevisionNumber",
+				"type": "INT32"
+			},
+			{
+				"name": "OrderDate",
+				"type": "INT96"
+			},
+			{
+				"name": "DueDate",
+				"type": "INT96"
+			},
+			{
+				"name": "ShipDate",
+				"type": "INT96"
+			},
+			{
+				"name": "Status",
+				"type": "INT32"
+			},
+			{
+				"name": "OnlineOrderFlag",
+				"type": "BOOLEAN"
+			},
+			{
+				"name": "SalesOrderNumber",
+				"type": "UTF8"
+			},
+			{
+				"name": "PurchaseOrderNumber",
+				"type": "UTF8"
+			},
+			{
+				"name": "AccountNumber",
+				"type": "UTF8"
+			},
+			{
+				"name": "CustomerID",
+				"type": "INT32"
+			},
+			{
+				"name": "SalesPersonID",
+				"type": "INT32"
+			},
+			{
+				"name": "TerritoryID",
+				"type": "INT32"
+			},
+			{
+				"name": "BillToAddressID",
+				"type": "INT32"
+			},
+			{
+				"name": "ShipToAddressID",
+				"type": "INT32"
+			},
+			{
+				"name": "ShipMethodID",
+				"type": "INT32"
+			},
+			{
+				"name": "CreditCardID",
+				"type": "INT32"
+			},
+			{
+				"name": "CreditCardApprovalCode",
+				"type": "UTF8"
+			},
+			{
+				"name": "CurrencyRateID",
+				"type": "INT32"
+			},
+			{
+				"name": "SubTotal",
+				"type": "DECIMAL",
+				"precision": 19,
+				"scale": 4
+			},
+			{
+				"name": "TaxAmt",
+				"type": "DECIMAL",
+				"precision": 19,
+				"scale": 4
+			},
+			{
+				"name": "Freight",
+				"type": "DECIMAL",
+				"precision": 19,
+				"scale": 4
+			},
+			{
+				"name": "TotalDue",
+				"type": "DECIMAL",
+				"precision": 19,
+				"scale": 4
+			},
+			{
+				"name": "Comment",
+				"type": "UTF8"
+			},
+			{
+				"name": "rowguid",
+				"type": "UTF8"
+			},
+			{
+				"name": "ModifiedDate",
+				"type": "INT96"
+			}
+		]
+	}
+}
