@@ -11,6 +11,7 @@
 			"location": {
 				"type": "AzureBlobFSLocation",
 				"fileName": "delta.json",
+				"folderPath": "CDC",
 				"fileSystem": "delta"
 			}
 		},
