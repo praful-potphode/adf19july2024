@@ -1,0 +1,20 @@
+{
+	"name": "ds_hr_employees_Avro",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_AzureDataLakeStorage1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Avro",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "hr_employees.avro",
+				"folderPath": "AVRO",
+				"fileSystem": "output"
+			}
+		},
+		"schema": {}
+	}
+}
