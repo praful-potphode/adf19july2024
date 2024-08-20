@@ -1,5 +1,5 @@
 {
-	"name": "pipeline2",
+	"name": "pl_set_variable_error_message",
 	"properties": {
 		"activities": [
 			{
@@ -15,10 +15,81 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"enableStaging": false
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "ds_creditcard_csv",
+						"type": "DatasetReference",
+						"parameters": {
+							"filename": "CreditCardData3.csv"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "AzureSqlTable1",
+						"type": "DatasetReference"
+					}
+				]
+			},
+			{
+				"name": "Set variable1",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Copy data1",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "ErrorMessage",
+					"value": {
+						"value": "@activity('Copy data1').Error.Message",
+						"type": "Expression"
+					}
 				}
 			}
 		],
+		"variables": {
+			"PipelineId": {
+				"type": "String"
+			},
+			"ErrorMessage": {
+				"type": "String"
+			}
+		},
 		"annotations": []
 	}
 }
