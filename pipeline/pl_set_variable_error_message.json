@@ -100,6 +100,24 @@
 					"secureInput": false
 				},
 				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureParameters": {
+						"Id": {
+							"value": {
+								"value": "@variables('PipelineId')",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"Message": {
+							"value": {
+								"value": "@variables('ErrorMessage')",
+								"type": "Expression"
+							},
+							"type": "String"
+						}
+					}
+				},
 				"linkedServiceName": {
 					"referenceName": "ls_onprem_SqlServer",
 					"type": "LinkedServiceReference"
