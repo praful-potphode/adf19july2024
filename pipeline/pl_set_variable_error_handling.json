@@ -1,5 +1,5 @@
 {
-	"name": "pl_set_variable_error_message",
+	"name": "pl_set_variable_error_handling",
 	"properties": {
 		"activities": [
 			{
@@ -79,48 +79,6 @@
 						"value": "@activity('Copy data1').Error.Message",
 						"type": "Expression"
 					}
-				}
-			},
-			{
-				"name": "Stored procedure1",
-				"type": "SqlServerStoredProcedure",
-				"dependsOn": [
-					{
-						"activity": "Set variable1",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"storedProcedureParameters": {
-						"Id": {
-							"value": {
-								"value": "@variables('PipelineId')",
-								"type": "Expression"
-							},
-							"type": "String"
-						},
-						"Message": {
-							"value": {
-								"value": "@variables('ErrorMessage')",
-								"type": "Expression"
-							},
-							"type": "String"
-						}
-					}
-				},
-				"linkedServiceName": {
-					"referenceName": "ls_onprem_SqlServer",
-					"type": "LinkedServiceReference"
 				}
 			}
 		],
